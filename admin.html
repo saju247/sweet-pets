@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Sweet Pets — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #FF6B4A;
+      --coral-dark: #e05030;
+      --coral-light: #fff2ee;
+      --ink: #1a1a2e;
+      --mist: #f8f7f5;
+      --white: #ffffff;
+      --border: #e8e4e0;
+      --radius: 12px;
+      --danger: #e03c3c;
+      --danger-light: #ffeaea;
+      --success: #1a8a52;
+      --success-light: #e6f9f0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--mist); color: var(--ink); }
+
+    /* LOGIN */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .login-card {
+      background: var(--white); border-radius: 18px;
+      padding: 2.5rem 2rem; width: 100%; max-width: 380px;
+      box-shadow: 0 8px 40px rgba(26,26,46,0.12);
+      text-align: center;
+    }
+    .login-card .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; font-weight: 900; margin-bottom: 0.25rem;
+    }
+    .login-card .logo span { color: var(--coral); }
+    .login-card p { color: #888; font-size: 0.9rem; margin-bottom: 1.8rem; }
+    .login-card input {
+      width: 100%; padding: 0.85rem 1rem; border: 1.5px solid var(--border);
+      border-radius: 10px; font-size: 1rem; font-family: inherit;
+      margin-bottom: 1rem; outline: none;
+    }
+    .login-card input:focus { border-color: var(--coral); }
+    .login-card button {
+      width: 100%; padding: 0.9rem; background: var(--coral); color: var(--white);
+      border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .login-card button:hover { background: var(--coral-dark); }
+    .login-error {
+      color: var(--danger); font-size: 0.85rem; margin-top: 0.75rem;
+      display: none;
+    }
+
+    /* ADMIN LAYOUT */
+    #admin-screen { display: none; min-height: 100vh; }
+    .admin-nav {
+      background: var(--ink); color: var(--white);
+      padding: 0 1.5rem; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .admin-nav .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; font-weight: 900;
+    }
+    .admin-nav .logo span { color: var(--coral); }
+    .admin-nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-btn {
+      background: rgba(255,255,255,0.1); color: var(--white);
+      border: none; border-radius: 8px; padding: 6px 14px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      font-family: inherit; text-decoration: none;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.18); }
+    .nav-btn.primary { background: var(--coral); }
+    .nav-btn.primary:hover { background: var(--coral-dark); }
+
+    .admin-body {
+      max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex; gap: 4px; margin-bottom: 2rem;
+      background: var(--white); border-radius: 10px;
+      padding: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      width: fit-content;
+    }
+    .tab-btn {
+      padding: 8px 20px; border-radius: 8px; border: none;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      background: none; color: #888; font-family: inherit;
+    }
+    .tab-btn.active { background: var(--coral); color: var(--white); }
+
+    /* PETS TABLE */
+    .pets-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;
+    }
+    .pets-header h2 { font-size: 1.2rem; font-weight: 700; }
+    .add-btn {
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: 10px; padding: 10px 20px;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .add-btn:hover { background: var(--coral-dark); }
+
+    .pet-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .pet-row {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .pet-row-photo {
+      width: 54px; height: 54px; border-radius: 8px;
+      object-fit: cover; background: #eee; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .pet-row-info { flex: 1; min-width: 0; }
+    .pet-row-name { font-weight: 700; font-size: 1rem; }
+    .pet-row-meta { font-size: 0.82rem; color: #888; margin-top: 2px; }
+    .pet-row-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .edit-btn {
+      background: var(--mist); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 6px 14px;
+      font-size: 0.82rem; font-weight: 600; color: var(--ink);
+      cursor: pointer; font-family: inherit;
+    }
+    .edit-btn:hover { border-color: var(--coral); color: var(--coral); }
+    .del-btn {
+      background: var(--danger-light); border: 1.5px solid #ffc5c5;
+      border-radius: 8px; padding: 6px 14px;
+      font-size: 0.82rem; font-weight: 600; color: var(--danger);
+      cursor: pointer; font-family: inherit;
+    }
+    .del-btn:hover { background: #ffdada; }
+
+    /* FORM */
+    #form-panel { display: none; }
+    .form-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 900; margin-bottom: 1.5rem;
+    }
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1/-1; }
+    .form-group label { font-size: 0.82rem; font-weight: 600; color: #666; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.75rem; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: 0.95rem; font-family: inherit;
+      outline: none; background: var(--mist);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--coral); background: var(--white); }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+
+    .photo-preview {
+      width: 120px; height: 90px; border-radius: 10px;
+      object-fit: cover; border: 2px solid var(--border);
+      display: none; margin-top: 8px;
+    }
+    .photo-preview.show { display: block; }
+
+    .form-actions {
+      display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .save-btn {
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: 10px; padding: 0.85rem 2rem;
+      font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .save-btn:hover { background: var(--coral-dark); }
+    .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .cancel-btn {
+      background: var(--mist); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 0.85rem 1.5rem;
+      font-size: 1rem; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--ink);
+    }
+
+    /* SETTINGS */
+    #settings-panel { display: none; }
+    .settings-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.75rem; max-width: 540px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .settings-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; font-weight: 900; margin-bottom: 1.25rem;
+    }
+    .settings-card input {
+      width: 100%; padding: 0.75rem; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: 0.95rem; font-family: inherit;
+      outline: none; margin-bottom: 1rem;
+    }
+    .settings-card input:focus { border-color: var(--coral); }
+    .settings-card p { font-size: 0.85rem; color: #888; margin-bottom: 1rem; line-height: 1.6; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: var(--white);
+      padding: 0.75rem 1.5rem; border-radius: 10px;
+      font-size: 0.9rem; font-weight: 600;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: var(--danger); }
+    .toast.success { background: var(--success); }
+
+    .empty-pets {
+      text-align: center; padding: 3rem 1rem; color: #aaa;
+      background: var(--white); border-radius: var(--radius);
+    }
+    .empty-pets .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo">Sweet<span>Pets</span></div>
+    <p>Admin panel — sign in to manage pets</p>
+    <input type="password" id="pwd-input" placeholder="Enter admin password" />
+    <button onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <nav class="admin-nav">
+    <div class="logo">Sweet<span>Pets</span> Admin</div>
+    <div class="admin-nav-right">
+      <a href="/" target="_blank" class="nav-btn">View site</a>
+      <button class="nav-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="admin-body">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('pets')">🐾 Pets</button>
+      <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+    </div>
+
+    <!-- PETS TAB -->
+    <div id="pets-panel">
+      <div id="list-panel">
+        <div class="pets-header">
+          <h2 id="pets-heading">All Pets</h2>
+          <button class="add-btn" onclick="openForm(null)">+ Add Pet</button>
+        </div>
+        <div class="pet-list" id="pet-list">
+          <div class="empty-pets"><div class="icon">🐾</div><p>Loading pets…</p></div>
+        </div>
+      </div>
+
+      <!-- ADD/EDIT FORM -->
+      <div id="form-panel">
+        <div class="form-card">
+          <div class="form-title" id="form-title">Add New Pet</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Species *</label>
+              <select id="f-species">
+                <option value="cat">Cat</option>
+                <option value="dog">Dog</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Name *</label>
+              <input type="text" id="f-name" placeholder="e.g. Bella" />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="f-status">
+                <option value="Available">Available</option>
+                <option value="Pending">Pending</option>
+                <option value="Adopted">Adopted</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Price</label>
+              <input type="text" id="f-price" placeholder="Free" />
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" id="f-state" placeholder="New York" value="New York" />
+            </div>
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" id="f-city" placeholder="e.g. Brooklyn" />
+            </div>
+            <div class="form-group">
+              <label>Breed</label>
+              <input type="text" id="f-breed" placeholder="e.g. Labrador Mix" />
+            </div>
+            <div class="form-group">
+              <label>Color</label>
+              <input type="text" id="f-color" placeholder="e.g. Golden" />
+            </div>
+            <div class="form-group">
+              <label>Coat</label>
+              <input type="text" id="f-coat" placeholder="Short / Long / Medium" />
+            </div>
+            <div class="form-group">
+              <label>Age</label>
+              <input type="text" id="f-age" placeholder="e.g. 2 years" />
+            </div>
+            <div class="form-group">
+              <label>Sex</label>
+              <select id="f-sex">
+                <option value="">Unknown</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Vaccinated</label>
+              <select id="f-vaccinated">
+                <option value="">Unknown</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Neutered / Spayed</label>
+              <select id="f-neutered">
+                <option value="">Unknown</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Potty Trained</label>
+              <select id="f-potty">
+                <option value="">Unknown</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>About (description)</label>
+              <textarea id="f-about" placeholder="Describe the pet's personality, habits, and needs…"></textarea>
+            </div>
+            <div class="form-group full">
+              <label>Photo</label>
+              <input type="file" id="f-photo" accept="image/*" onchange="previewPhoto(this)" />
+              <img id="photo-preview" class="photo-preview" alt="Preview" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="save-btn" id="save-btn" onclick="savePet()">Save Pet</button>
+            <button class="cancel-btn" onclick="closeForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="settings-panel">
+      <div class="settings-card">
+        <h2>Application Form Link</h2>
+        <p>Paste the link to your adoption application form here. This link powers every "Apply for Adoption" button on your site.</p>
+        <input type="url" id="apply-link-input" placeholder="https://forms.google.com/..." />
+        <button class="save-btn" onclick="saveSettings()">Save Link</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let adminPassword = "";
+  let pets = [];
+  let editingId = null;
+  let pendingPhotoFile = null;
+
+  // LOGIN
+  document.getElementById("pwd-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") doLogin();
+  });
+
+  async function doLogin() {
+    const pwd = document.getElementById("pwd-input").value.trim();
+    if (!pwd) return;
+    try {
+      const res = await fetch("/api/data", { headers: { "x-admin-password": pwd } });
+      if (res.status === 401) {
+        document.getElementById("login-error").style.display = "block";
+        return;
+      }
+      adminPassword = pwd;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("admin-screen").style.display = "block";
+      await loadData();
+    } catch {
+      showToast("Connection error. Check your internet.", "error");
+    }
+  }
+
+  function doLogout() {
+    adminPassword = "";
+    location.reload();
+  }
+
+  // LOAD
+  async function loadData() {
+    try {
+      const res = await fetch("/api/data");
+      const data = await res.json();
+      pets = data.pets || [];
+      document.getElementById("apply-link-input").value = data.applyLink || "";
+      renderPetList();
+    } catch {
+      showToast("Could not load pets.", "error");
+    }
+  }
+
+  function renderPetList() {
+    const list = document.getElementById("pet-list");
+    document.getElementById("pets-heading").textContent = `All Pets (${pets.length})`;
+    if (!pets.length) {
+      list.innerHTML = `<div class="empty-pets"><div class="icon">🐾</div><p>No pets yet. Tap "+ Add Pet" to add your first one.</p></div>`;
+      return;
+    }
+    list.innerHTML = pets.map(p => `
+      <div class="pet-row">
+        ${p.photo
+          ? `<img class="pet-row-photo" src="/api/image/${p.photo}" alt="${p.name}" onerror="this.style.display='none'" />`
+          : `<div class="pet-row-photo">${p.species === "dog" ? "🐶" : "🐱"}</div>`
+        }
+        <div class="pet-row-info">
+          <div class="pet-row-name">${p.name} <span style="color:#aaa;font-weight:400;font-size:0.82rem">${p.species === "dog" ? "· Dog" : "· Cat"}</span></div>
+          <div class="pet-row-meta">${[p.breed, p.city, p.status].filter(Boolean).join(" · ")}</div>
+        </div>
+        <div class="pet-row-actions">
+          <button class="edit-btn" onclick="openForm('${p.id}')">Edit</button>
+          <button class="del-btn" onclick="deletePet('${p.id}')">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // FORM
+  function openForm(id) {
+    editingId = id;
+    pendingPhotoFile = null;
+    document.getElementById("photo-preview").classList.remove("show");
+    document.getElementById("form-title").textContent = id ? "Edit Pet" : "Add New Pet";
+    document.getElementById("list-panel").style.display = "none";
+    document.getElementById("form-panel").style.display = "block";
+
+    if (id) {
+      const p = pets.find(x => x.id === id);
+      if (p) {
+        document.getElementById("f-species").value = p.species || "cat";
+        document.getElementById("f-name").value = p.name || "";
+        document.getElementById("f-status").value = p.status || "Available";
+        document.getElementById("f-price").value = p.price || "";
+        document.getElementById("f-state").value = p.state || "New York";
+        document.getElementById("f-city").value = p.city || "";
+        document.getElementById("f-breed").value = p.breed || "";
+        document.getElementById("f-color").value = p.color || "";
+        document.getElementById("f-coat").value = p.coat || "";
+        document.getElementById("f-age").value = p.age || "";
+        document.getElementById("f-sex").value = p.sex || "";
+        document.getElementById("f-vaccinated").value = p.vaccinated || "";
+        document.getElementById("f-neutered").value = p.neutered || "";
+        document.getElementById("f-potty").value = p.pottyTrained || "";
+        document.getElementById("f-about").value = p.about || "";
+        if (p.photo) {
+          const prev = document.getElementById("photo-preview");
+          prev.src = `/api/image/${p.photo}`;
+          prev.classList.add("show");
+        }
+      }
+    } else {
+      document.getElementById("f-species").value = "cat";
+      document.getElementById("f-name").value = "";
+      document.getElementById("f-status").value = "Available";
+      document.getElementById("f-price").value = "Free";
+      document.getElementById("f-state").value = "New York";
+      document.getElementById("f-city").value = "";
+      document.getElementById("f-breed").value = "";
+      document.getElementById("f-color").value = "";
+      document.getElementById("f-coat").value = "";
+      document.getElementById("f-age").value = "";
+      document.getElementById("f-sex").value = "";
+      document.getElementById("f-vaccinated").value = "";
+      document.getElementById("f-neutered").value = "";
+      document.getElementById("f-potty").value = "";
+      document.getElementById("f-about").value = "";
+    }
+  }
+
+  function closeForm() {
+    document.getElementById("list-panel").style.display = "block";
+    document.getElementById("form-panel").style.display = "none";
+    editingId = null;
+    pendingPhotoFile = null;
+  }
+
+  function previewPhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    pendingPhotoFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById("photo-preview");
+      prev.src = e.target.result;
+      prev.classList.add("show");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function resizeImage(file, maxPx = 1100) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(resolve, "image/jpeg", 0.88);
+      };
+      img.src = url;
+    });
+  }
+
+  async function savePet() {
+    const name = document.getElementById("f-name").value.trim();
+    if (!name) { showToast("Please enter a name.", "error"); return; }
+
+    const btn = document.getElementById("save-btn");
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+
+    try {
+      let photoId = null;
+
+      // Upload photo if new one selected
+      if (pendingPhotoFile) {
+        const blob = await resizeImage(pendingPhotoFile);
+        const fd = new FormData();
+        fd.append("image", blob, "photo.jpg");
+        const imgRes = await fetch("/api/image", {
+          method: "POST",
+          headers: { "x-admin-password": adminPassword },
+          body: fd
+        });
+        if (!imgRes.ok) throw new Error("Photo upload failed");
+        const imgData = await imgRes.json();
+        photoId = imgData.id;
+      } else if (editingId) {
+        const existing = pets.find(p => p.id === editingId);
+        photoId = existing && existing.photo ? existing.photo : null;
+      }
+
+      const pet = {
+        id: editingId || ("pet-" + Date.now()),
+        species: document.getElementById("f-species").value,
+        name,
+        status: document.getElementById("f-status").value,
+        price: document.getElementById("f-price").value || "Free",
+        state: document.getElementById("f-state").value,
+        city: document.getElementById("f-city").value,
+        breed: document.getElementById("f-breed").value,
+        color: document.getElementById("f-color").value,
+        coat: document.getElementById("f-coat").value,
+        age: document.getElementById("f-age").value,
+        sex: document.getElementById("f-sex").value,
+        vaccinated: document.getElementById("f-vaccinated").value,
+        neutered: document.getElementById("f-neutered").value,
+        pottyTrained: document.getElementById("f-potty").value,
+        about: document.getElementById("f-about").value,
+        photo: photoId
+      };
+
+      if (editingId) {
+        pets = pets.map(p => p.id === editingId ? pet : p);
+      } else {
+        pets.push(pet);
+      }
+
+      await saveAllPets();
+      closeForm();
+      showToast(editingId ? "Pet updated!" : "Pet added!", "success");
+    } catch (e) {
+      showToast("Save failed: " + e.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Save Pet";
+    }
+  }
+
+  async function deletePet(id) {
+    if (!confirm("Delete this pet? This cannot be undone.")) return;
+    pets = pets.filter(p => p.id !== id);
+    await saveAllPets();
+    showToast("Pet deleted.", "success");
+  }
+
+  async function saveAllPets() {
+    const applyLink = document.getElementById("apply-link-input").value.trim();
+    const res = await fetch("/api/data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": adminPassword
+      },
+      body: JSON.stringify({ pets, applyLink })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Save failed");
+    }
+    renderPetList();
+  }
+
+  async function saveSettings() {
+    try {
+      await saveAllPets();
+      showToast("Settings saved!", "success");
+    } catch (e) {
+      showToast("Failed: " + e.message, "error");
+    }
+  }
+
+  // TABS
+  function switchTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    event.target.classList.add("active");
+    document.getElementById("pets-panel").style.display = tab === "pets" ? "block" : "none";
+    document.getElementById("settings-panel").style.display = tab === "settings" ? "block" : "none";
+  }
+
+  // TOAST
+  function showToast(msg, type = "") {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast show" + (type ? " " + type : "");
+    setTimeout(() => { t.className = "toast"; }, 3000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "sweet-pets",
+  "version": "1.0.0",
+  "description": "Dog and cat adoption website",
+  "dependencies": {
+    "@netlify/blobs": "^7.0.0"
+  }
+}

@@ -1,0 +1,18 @@
+[build]
+  publish = "."
+  functions = "functions"
+
+[[headers]]
+  for = "/admin"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/admin.html"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200

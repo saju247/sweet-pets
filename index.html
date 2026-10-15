@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet Pets — Dog & Cat Adoption across the USA</title>
+  <meta name="description" content="Find your perfect dog or cat companion across the USA. Every pet deserves a loving home." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #FF6B4A;
+      --coral-dark: #e05030;
+      --coral-light: #fff2ee;
+      --ink: #1a1a2e;
+      --ink-soft: #444460;
+      --mist: #f8f7f5;
+      --white: #ffffff;
+      --border: #e8e4e0;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(26,26,46,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--mist);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      padding: 0 1.25rem;
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 62px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 900;
+      color: var(--ink); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .logo span { color: var(--coral); }
+    .nav-tag {
+      background: var(--coral-light);
+      color: var(--coral-dark);
+      font-size: 0.72rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+
+    /* HERO */
+    .hero {
+      background: var(--ink);
+      color: var(--white);
+      padding: 3.5rem 1.25rem 3rem;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,107,74,0.18);
+      color: #ffb39e;
+      font-size: 0.8rem; font-weight: 600;
+      padding: 5px 14px; border-radius: 20px;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      font-weight: 900; line-height: 1.12;
+      max-width: 680px; margin: 0 auto 1rem;
+    }
+    .hero h1 em { color: var(--coral); font-style: normal; }
+    .hero p {
+      font-size: 1.05rem; color: #bbb;
+      max-width: 480px; margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    /* FILTERS */
+    .filters-wrap {
+      background: var(--white);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 1.1rem 1.25rem;
+    }
+    .filters {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-label { font-size: 0.82rem; color: #888; font-weight: 500; }
+    .filter-btn {
+      background: var(--mist); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 7px 16px;
+      font-size: 0.88rem; font-weight: 500; color: var(--ink-soft);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: var(--coral); color: var(--coral); }
+    .filter-btn.active {
+      background: var(--coral); border-color: var(--coral);
+      color: var(--white);
+    }
+    .filter-select {
+      background: var(--mist); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 7px 12px;
+      font-size: 0.88rem; color: var(--ink-soft);
+      cursor: pointer; outline: none;
+    }
+    .filter-select:focus { border-color: var(--coral); }
+
+    /* MAIN */
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+
+    .results-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .results-count { font-size: 0.9rem; color: #888; }
+    .results-count strong { color: var(--ink); }
+
+    /* GRID */
+    .pet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* CARD */
+    .pet-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s;
+      text-decoration: none; color: inherit;
+      display: block;
+    }
+    .pet-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(26,26,46,0.14);
+    }
+    .card-photo {
+      width: 100%; aspect-ratio: 4/3; object-fit: cover;
+      background: #eee;
+      display: block;
+    }
+    .card-photo-placeholder {
+      width: 100%; aspect-ratio: 4/3;
+      background: linear-gradient(135deg, #f0ede8, #e0dbd4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+    }
+    .card-body { padding: 1rem 1rem 1.1rem; }
+    .card-species {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--coral); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 3px;
+    }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .card-meta {
+      font-size: 0.82rem; color: #888; margin-bottom: 10px;
+    }
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-price {
+      font-size: 0.95rem; font-weight: 600; color: var(--ink);
+    }
+    .badge {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .badge-available { background: #e6f9f0; color: #1a8a52; }
+    .badge-pending { background: #fff5e0; color: #b07800; }
+    .badge-adopted { background: #f0f0f0; color: #888; }
+
+    /* EMPTY */
+    .empty-state {
+      text-align: center; padding: 4rem 1rem; color: #aaa;
+      grid-column: 1/-1;
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-size: 1rem; }
+
+    /* LOADING */
+    .loading-state {
+      text-align: center; padding: 4rem 1rem;
+      grid-column: 1/-1; color: #aaa;
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid #eee;
+      border-top-color: var(--coral); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* DETAIL PAGE */
+    #detail-page { display: none; }
+    #list-page { display: block; }
+
+    .detail-wrap {
+      max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 4rem;
+    }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--coral); font-weight: 600; font-size: 0.9rem;
+      background: none; border: none; cursor: pointer;
+      margin-bottom: 1.5rem; padding: 0;
+    }
+    .back-btn:hover { text-decoration: underline; }
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 640px) {
+      .detail-layout { grid-template-columns: 1fr; }
+    }
+    .detail-photo {
+      width: 100%; border-radius: var(--radius);
+      object-fit: cover; aspect-ratio: 4/3;
+      box-shadow: var(--shadow);
+    }
+    .detail-photo-placeholder {
+      width: 100%; border-radius: var(--radius);
+      aspect-ratio: 4/3; background: linear-gradient(135deg, #f0ede8, #e0dbd4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+    }
+    .detail-info {}
+    .detail-species {
+      font-size: 0.78rem; font-weight: 600; color: var(--coral);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
+    }
+    .detail-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 900;
+      line-height: 1.1; margin-bottom: 0.5rem;
+    }
+    .detail-location { font-size: 0.95rem; color: #888; margin-bottom: 1rem; }
+    .detail-about {
+      font-size: 0.97rem; line-height: 1.7; color: var(--ink-soft);
+      margin-bottom: 1.25rem;
+    }
+    .detail-facts {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.6rem; margin-bottom: 1.5rem;
+    }
+    .fact {
+      background: var(--mist); border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .fact-label { font-size: 0.72rem; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .fact-value { font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-top: 2px; }
+    .apply-btn {
+      display: block; width: 100%;
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: 12px;
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem; font-weight: 700;
+      text-align: center; text-decoration: none;
+      cursor: pointer; transition: background 0.15s, transform 0.12s;
+      font-family: 'Inter', sans-serif;
+    }
+    .apply-btn:hover {
+      background: var(--coral-dark); transform: translateY(-2px);
+    }
+    .adopted-notice {
+      background: #f0f0f0; border-radius: 12px;
+      padding: 1rem 1.5rem; text-align: center;
+      color: #888; font-weight: 600; font-size: 1rem;
+    }
+
+    /* HOW IT WORKS */
+    .how-section {
+      background: var(--white);
+      padding: 3.5rem 1.25rem;
+      margin-top: 2rem;
+    }
+    .how-inner { max-width: 860px; margin: 0 auto; }
+    .how-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900;
+      margin-bottom: 2rem; text-align: center;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .step {
+      text-align: center; padding: 1.5rem 1rem;
+    }
+    .step-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--coral-light); color: var(--coral);
+      font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .step h3 {
+      font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem;
+    }
+    .step p { font-size: 0.88rem; color: #888; line-height: 1.6; }
+
+    /* FOOTER */
+    footer {
+      background: var(--ink); color: #888;
+      text-align: center; padding: 2rem 1.25rem;
+      font-size: 0.82rem; line-height: 1.8;
+    }
+    footer strong { color: var(--white); }
+    footer a { color: var(--coral); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      .filters { gap: 0.5rem; }
+      .detail-facts { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#/" class="logo">Sweet<span>Pets</span></a>
+    <span class="nav-tag">USA</span>
+  </div>
+</nav>
+
+<!-- LIST PAGE -->
+<div id="list-page">
+  <section class="hero">
+    <div class="hero-eyebrow">🐾 Adoption Open</div>
+    <h1>Find your perfect<br><em>companion</em> across the USA</h1>
+    <p>Every dog and cat here is looking for a loving forever home. Browse available pets and apply today.</p>
+  </section>
+
+  <div class="filters-wrap">
+    <div class="filters">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active" data-species="all">All Pets</button>
+      <button class="filter-btn" data-species="dog">🐶 Dogs</button>
+      <button class="filter-btn" data-species="cat">🐱 Cats</button>
+      <select class="filter-select" id="location-filter">
+        <option value="all">All Locations</option>
+        <option value="New York City">New York City</option>
+        <option value="Brooklyn">Brooklyn</option>
+        <option value="Queens">Queens</option>
+        <option value="Bronx">Bronx</option>
+        <option value="Staten Island">Staten Island</option>
+        <option value="Long Island">Long Island</option>
+        <option value="Buffalo">Buffalo</option>
+        <option value="Albany">Albany</option>
+      </select>
+    </div>
+  </div>
+
+  <main>
+    <div class="results-bar">
+      <span class="results-count" id="results-count">Loading pets…</span>
+    </div>
+    <div class="pet-grid" id="pet-grid">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Finding pets near you…</p>
+      </div>
+    </div>
+  </main>
+
+  <section class="how-section">
+    <div class="how-inner">
+      <h2>How adoption works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-icon">🔍</div>
+          <h3>Browse & choose</h3>
+          <p>Look through our available dogs and cats. Each profile has honest details about the pet's personality and needs.</p>
+        </div>
+        <div class="step">
+          <div class="step-icon">📋</div>
+          <h3>Submit an application</h3>
+          <p>Tap "Apply for Adoption" on any pet's page and fill in our short application form. We review every application personally.</p>
+        </div>
+        <div class="step">
+          <div class="step-icon">🏡</div>
+          <h3>Welcome them home</h3>
+          <p>Once approved, we'll arrange a meet-and-greet and help you bring your new companion home safely.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <strong>Sweet Pets</strong> — Dog & Cat Adoption · USA<br>
+    All pets are real. We do not use fake reviews or invented statistics.<br>
+    <a href="/admin">Admin</a>
+  </footer>
+</div>
+
+<!-- DETAIL PAGE -->
+<div id="detail-page">
+  <div class="detail-wrap">
+    <button class="back-btn" id="back-btn">← Back to all pets</button>
+    <div class="detail-layout">
+      <div id="detail-photo-wrap"></div>
+      <div class="detail-info" id="detail-info"></div>
+    </div>
+  </div>
+</div>
+
+<script src="cats.js"></script>
+<script>
+  let allPets = [];
+  let applyLink = "";
+  let activeSpecies = "all";
+  let activeLocation = "all";
+
+  async function loadPets() {
+    try {
+      const res = await fetch("/api/data");
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      allPets = data.pets || [];
+      applyLink = data.applyLink || "";
+    } catch {
+      allPets = window.FALLBACK_PETS || [];
+      applyLink = (window.APP_CONFIG && window.APP_CONFIG.applyLink) || "";
+    }
+    renderGrid();
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById("pet-grid");
+    const count = document.getElementById("results-count");
+    let pets = allPets;
+    if (activeSpecies !== "all") pets = pets.filter(p => p.species === activeSpecies);
+    if (activeLocation !== "all") pets = pets.filter(p => p.city === activeLocation || p.state === activeLocation);
+
+    count.innerHTML = `<strong>${pets.length}</strong> pet${pets.length !== 1 ? "s" : ""} available`;
+
+    if (!pets.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="icon">🐾</div><p>No pets match your filters right now.<br>Check back soon!</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = pets.map(p => `
+      <a class="pet-card" href="#/pet/${p.id}">
+        ${p.photo
+          ? `<img class="card-photo" src="${p.photo.startsWith("blob:") || p.photo.startsWith("http") || p.photo.startsWith("/api/image/") ? p.photo : "/api/image/" + p.photo}" alt="${p.name}" loading="lazy" />`
+          : `<div class="card-photo-placeholder">${p.species === "dog" ? "🐶" : "🐱"}</div>`
+        }
+        <div class="card-body">
+          <div class="card-species">${p.species === "dog" ? "Dog" : "Cat"}</div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-meta">${[p.breed, p.city || p.state].filter(Boolean).join(" · ")}</div>
+          <div class="card-footer">
+            <span class="card-price">${p.price || "Free"}</span>
+            <span class="badge badge-${(p.status || "available").toLowerCase()}">${p.status || "Available"}</span>
+          </div>
+        </div>
+      </a>
+    `).join("");
+  }
+
+  function showDetail(id) {
+    const pet = allPets.find(p => p.id === id);
+    if (!pet) { location.hash = "/"; return; }
+
+    document.getElementById("list-page").style.display = "none";
+    document.getElementById("detail-page").style.display = "block";
+    window.scrollTo(0, 0);
+
+    const photoWrap = document.getElementById("detail-photo-wrap");
+    const info = document.getElementById("detail-info");
+
+    photoWrap.innerHTML = pet.photo
+      ? `<img class="detail-photo" src="${pet.photo.startsWith("/api/image/") || pet.photo.startsWith("http") ? pet.photo : "/api/image/" + pet.photo}" alt="${pet.name}" />`
+      : `<div class="detail-photo-placeholder">${pet.species === "dog" ? "🐶" : "🐱"}</div>`;
+
+    const facts = [
+      ["Breed", pet.breed], ["Age", pet.age], ["Sex", pet.sex],
+      ["Color", pet.color], ["Coat", pet.coat],
+      ["Vaccinated", pet.vaccinated], ["Neutered/Spayed", pet.neutered],
+      ["Potty Trained", pet.pottyTrained], ["Price", pet.price || "Free"]
+    ].filter(([, v]) => v);
+
+    const isAdopted = (pet.status || "").toLowerCase() === "adopted";
+
+    info.innerHTML = `
+      <div class="detail-species">${pet.species === "dog" ? "Dog" : "Cat"}</div>
+      <div class="detail-name">${pet.name}</div>
+      <div class="detail-location">📍 ${[pet.city, pet.state].filter(Boolean).join(", ")}</div>
+      ${pet.about ? `<p class="detail-about">${pet.about}</p>` : ""}
+      ${facts.length ? `<div class="detail-facts">${facts.map(([l, v]) => `<div class="fact"><div class="fact-label">${l}</div><div class="fact-value">${v}</div></div>`).join("")}</div>` : ""}
+      ${isAdopted
+        ? `<div class="adopted-notice">✅ This pet has been adopted</div>`
+        : applyLink
+          ? `<a class="apply-btn" href="${applyLink}" target="_blank" rel="noopener">Apply for Adoption</a>`
+          : `<div class="adopted-notice" style="background:var(--coral-light);color:var(--coral-dark)">Application form coming soon</div>`
+      }
+    `;
+  }
+
+  function showList() {
+    document.getElementById("list-page").style.display = "block";
+    document.getElementById("detail-page").style.display = "none";
+    window.scrollTo(0, 0);
+  }
+
+  function handleRoute() {
+    const hash = location.hash;
+    if (hash.startsWith("#/pet/")) {
+      const id = hash.slice(6);
+      showDetail(id);
+    } else {
+      showList();
+    }
+  }
+
+  // Species filter buttons
+  document.querySelectorAll(".filter-btn[data-species]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".filter-btn[data-species]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeSpecies = btn.dataset.species;
+      renderGrid();
+    });
+  });
+
+  // Location filter
+  document.getElementById("location-filter").addEventListener("change", e => {
+    activeLocation = e.target.value;
+    renderGrid();
+  });
+
+  // Back button
+  document.getElementById("back-btn").addEventListener("click", () => {
+    history.back();
+  });
+
+  window.addEventListener("hashchange", handleRoute);
+  window.addEventListener("load", () => {
+    loadPets().then(handleRoute);
+  });
+</script>
+</body>
+</html>
